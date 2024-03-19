@@ -44,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent)
     //禁用发送按钮
     ui->sendBt->setEnabled(false);
 
+    ui->serialStatusLb->setStyleSheet("color:red;");
+    ui->stateBar->setStyleSheet("color:red;");
 }
 
 
@@ -66,6 +68,7 @@ void MainWindow::InitSerialPortName()
     }
 }
 
+//打开串口和关闭串口设置
 void MainWindow::on_OpenBt_clicked()
 {
     if(ui->OpenBt->text()==tr("打开串口"))
@@ -131,6 +134,15 @@ void MainWindow::on_OpenBt_clicked()
             //使能发送按钮
             ui->sendBt->setEnabled(true);
 
+            ui->serialStatusLb->setText(tr("Connected"));
+            ui->serialStatusLb->setStyleSheet("color: #00FF00;");
+
+            //ui左下角状态条
+            QString si = "%1 OPENED, %2, %3, %4, %5";
+            QString status = si.arg(serial->portName()).arg(serial->baudRate()).arg(serial->dataBits()).arg(serial->parity()).arg(serial->stopBits());
+            ui->stateBar->setText(status);
+            ui->stateBar->setStyleSheet("color: #00FF00;");
+
             ui->OpenBt->setText(tr("关闭串口"));
             connect(serial, &QSerialPort::readyRead, this, &MainWindow::readData);
         }
@@ -149,8 +161,14 @@ void MainWindow::on_OpenBt_clicked()
         ui->checkbitCb->setEnabled(true);
         ui->serialCb->setEnabled(true);
         ui->stopbitCb->setEnabled(true);
-        //重新失能发送功能
+        //失能发送功能
         ui->sendBt->setEnabled(false);
+
+        ui->serialStatusLb->setText(tr("Closed"));
+        ui->serialStatusLb->setStyleSheet("color:red;");
+
+        ui->stateBar->setText(tr("Closed"));
+        ui->stateBar->setStyleSheet("color:red;");
 
         ui->OpenBt->setText(tr("打开串口"));
 
@@ -160,6 +178,7 @@ void MainWindow::on_OpenBt_clicked()
 void MainWindow::readData()
 {
     QByteArray buf;
+    QByteArray receivedData;
 
     qDebug() << "readData: " << endl;
 
@@ -167,11 +186,11 @@ void MainWindow::readData()
     if (!buf.isEmpty())
     {
         QString str = ui->recvEdit->toPlainText();
-
         str += tr(buf);
         ui->recvEdit->clear();
-        ui->recvEdit->append(str);
+        ui->recvEdit->append("接收：" + str + "\n");
     }
+    buf.clear();
 }
 
 //发送功能
@@ -180,12 +199,19 @@ void MainWindow::on_sendBt_clicked()
 
     //发送显示在接收区
     QString data = ui->sendEdit->toPlainText();
-    QString textToSend = "发送：" + data;
-    ui->recvEdit->append(textToSend);
 
-    //发送数据至串口
-    QByteArray dataToUart = data.toLatin1();
-    serial->write(dataToUart);
+    if(!data.isEmpty())
+    {
+        getTimestamp = QDateTime::currentDateTime().toString("hh:mm:ss.zzz");//获取时间戳
+        QString textToSend = "[" + getTimestamp + "]" + "发送-> <" + data + ">";
+        ui->recvEdit->append(textToSend);
+
+        //发送数据至串口
+        QByteArray dataToUart = data.toLatin1();
+        serial->write(dataToUart);
+    }
+    else
+        QMessageBox::warning(nullptr, "Empty Input", "Input is empty!");
 }
 
 //清空接收功能

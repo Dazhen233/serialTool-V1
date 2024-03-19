@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>788</width>
     <height>600</height>
    </rect>
   </property>
@@ -83,16 +83,16 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>180</y>
+       <y>190</y>
        <width>131</width>
-       <height>61</height>
+       <height>46</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
-       <widget class="QPushButton" name="btnSerialCheck">
+      <item alignment="Qt::AlignHCenter">
+       <widget class="QLabel" name="serialStatusLb">
         <property name="text">
-         <string>检测串口</string>
+         <string>Closed</string>
         </property>
        </widget>
       </item>
@@ -326,17 +326,17 @@
      <string>清空发送</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_6">
+   <widget class="QLabel" name="stateBar">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>10</x>
       <y>560</y>
-      <width>41</width>
+      <width>191</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string>Closed</string>
     </property>
    </widget>
   </widget>

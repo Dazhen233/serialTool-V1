@@ -7,6 +7,7 @@
 #include <Qdebug>
 #include <QList>
 #include <QMessageBox>
+#include <QDateTime>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -41,5 +42,7 @@ private:
     Ui::MainWindow *ui;
 
     QSerialPort *serial;
+
+    QString getTimestamp;
 };
 #endif // MAINWINDOW_H
