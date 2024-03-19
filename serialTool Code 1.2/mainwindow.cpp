@@ -175,20 +175,25 @@ void MainWindow::on_OpenBt_clicked()
     }
 }
 
+//创建时间戳
+QString getTimestamp()
+{
+    return QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
+}
+
+
 void MainWindow::readData()
 {
     QByteArray buf;
-    QByteArray receivedData;
 
     qDebug() << "readData: " << endl;
 
     buf = serial->readAll();
     if (!buf.isEmpty())
     {
-        QString str = ui->recvEdit->toPlainText();
-        str += tr(buf);
-        ui->recvEdit->clear();
-        ui->recvEdit->append("接收：" + str + "\n");
+        QString recvData = QString::fromLatin1(buf);
+        QString textToShow = "[" + getTimestamp() + "]" + "接收-> < " + recvData + " >";
+        ui->recvEdit->append(textToShow);
     }
     buf.clear();
 }
@@ -202,8 +207,7 @@ void MainWindow::on_sendBt_clicked()
 
     if(!data.isEmpty())
     {
-        getTimestamp = QDateTime::currentDateTime().toString("hh:mm:ss.zzz");//获取时间戳
-        QString textToSend = "[" + getTimestamp + "]" + "发送-> <" + data + ">";
+        QString textToSend = "[" + getTimestamp() + "]" + "发送-> < " + data + " >";
         ui->recvEdit->append(textToSend);
 
         //发送数据至串口

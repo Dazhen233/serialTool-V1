@@ -43,6 +43,5 @@ private:
 
     QSerialPort *serial;
 
-    QString getTimestamp;
 };
 #endif // MAINWINDOW_H
