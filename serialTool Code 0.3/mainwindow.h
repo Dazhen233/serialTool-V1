@@ -35,6 +35,8 @@ private slots:
 
     void on_btnClearSend_clicked();
 
+    void on_chk_rev_line_stateChanged(int arg1);
+
 private:
 
     void InitSerialPortName();
@@ -42,6 +44,10 @@ private:
     Ui::MainWindow *ui;
 
     QSerialPort *serial;
+
+    QString hexDataToSend;
+
+    bool firstDisplay;
 
 };
 #endif // MAINWINDOW_H

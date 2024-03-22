@@ -49,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 
+
 MainWindow::~MainWindow()
 {
     delete ui;
@@ -186,37 +187,99 @@ void MainWindow::readData()
 {
     QByteArray buf;
 
-    qDebug() << "readData: " << endl;
-
     buf = serial->readAll();
+
     if (!buf.isEmpty())
     {
-        QString recvData = QString::fromLatin1(buf);
-        QString textToShow = "[" + getTimestamp() + "]" + "接收-> < " + recvData + " >";
-        ui->recvEdit->append(textToShow);
+        QString recvData;
+
+        if (ui->chk_rev_hex->isChecked())
+        {
+            recvData = buf.toHex().toUpper(); // 转换为大写的十六进制字符串
+
+            // 在每两个字符之间插入一个空格
+            for(int i = 2; i < recvData.length(); i+=3)
+            {
+                recvData.insert(i, ' ');
+            }
+        }
+        else
+        {
+            recvData = QString::fromLatin1(buf); // 使用 Latin1 编码解析接收的数据
+        }
+
+        QString textToShow;
+
+        //检查接收是否需要时间戳
+        if(ui->recvTS->isChecked())
+        {
+            textToShow = "[" + getTimestamp() + "]" + " 接收<- < " + recvData + " >";
+        }
+        else
+        {
+            textToShow = "接收<- < " + recvData + " >";
+        }
+
+        //检查发送是否需要自动换行
+        if(ui->chk_rev_line->isChecked())
+        {
+            ui->recvEdit->append(textToShow);
+        }
+        else
+        {
+            if(firstDisplay)
+            {
+                textToShow = "接收<-" + recvData;
+                firstDisplay = false;
+            }
+            else
+            {
+                textToShow = recvData;
+            }
+            ui->recvEdit->insertPlainText(textToShow);
+        }
     }
     buf.clear();
 }
 
-//发送功能
+//发送以及发送显示功能
 void MainWindow::on_sendBt_clicked()
 {
+    QString data = ui->sendEdit->toPlainText().trimmed();
+    QByteArray textToUart;
 
-    //发送显示在接收区
-    QString data = ui->sendEdit->toPlainText();
-
-    if(!data.isEmpty())
+    // 检查是否有数据
+    if(data.isEmpty())
     {
-        QString textToSend = "[" + getTimestamp() + "]" + "发送-> < " + data + " >";
-        ui->recvEdit->append(textToSend);
+        QMessageBox::warning(nullptr, "Empty Input", "Input is empty!");
+        return;
+    }
 
-        //发送数据至串口
-        QByteArray dataToUart = data.toLatin1();
-        serial->write(dataToUart);
+    // 检查是否需要十六进制发送
+    if(ui->chk_send_hex->isChecked())
+    {
+        textToUart = QByteArray::fromHex(data.toLatin1());
+        serial->write(textToUart);
     }
     else
-        QMessageBox::warning(nullptr, "Empty Input", "Input is empty!");
+    {
+        textToUart = data.toLatin1();
+        serial->write(textToUart);
+    }
+
+    QString textToSend;
+
+    //检查发送是否需要时间戳
+    if(ui->sendTS->isChecked())
+    {
+        textToSend = "[" + getTimestamp() + "] 发送-> < " + textToUart + " >";
+    }
+    else
+    {
+        textToSend = "发送-> < " + textToUart + " >";
+    }
 }
+
 
 //清空接收功能
 void MainWindow::on_ClearBt_clicked()
@@ -228,5 +291,16 @@ void MainWindow::on_ClearBt_clicked()
 void MainWindow::on_btnClearSend_clicked()
 {
     ui->sendEdit->clear();
+}
+
+//更新firstDisplay状态
+void MainWindow::on_chk_rev_line_stateChanged(int state)
+{
+    Q_UNUSED(state);
+    if (!ui->chk_rev_line->isChecked())
+    {
+        ui->recvEdit->insertPlainText("\n");//换行，避免和自动换行粘连
+        firstDisplay = true;
+    }
 }
 
