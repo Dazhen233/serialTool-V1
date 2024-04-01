@@ -140,15 +140,16 @@ void MainWindow::updateSerialPorts()
     }
 
     //combobox计算下拉框长度，使串口信息显示完整
-    int max_len=0;
-    for(int idx=0;idx < this->ui->serialCb->count();idx++)
+    int max_len = 0;
+    QFontMetrics fontMetrics(ui->serialCb->font());
+    for(int idx = 0; idx < this->ui->serialCb->count(); idx++)
     {
         QString portName = ui->serialCb->itemText(idx);
-        if(max_len < portName.length())
-            max_len = portName.length();
+        int width = fontMetrics.horizontalAdvance(portName);
+        if(max_len < width)
+            max_len = width;
     }
-    //ui->serialCb->view()->setMinimumWidth(ui->serialCb->fontMetrics().horizontalAdvance(QLatin1Char('X')) * max_len);
-    ui->serialCb->view()->setMinimumWidth(5 * max_len); //数字5为计算结果，如不对后续调整
+    ui->serialCb->view()->setMinimumWidth(max_len*1.1);//1.1为计算值，不对需替换
 
     // 更新之前的串口列表为当前的串口列表
     previousPorts = currentPorts;
